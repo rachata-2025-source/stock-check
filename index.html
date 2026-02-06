@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
 
 <style>
-body{margin:0;font-family:system-ui,sans-serif;background:#f3f4f6;color:#111;padding-bottom:100px}
+body{margin:0;font-family:system-ui,sans-serif;background:#f3f4f6;color:#111;padding-bottom:120px}
 header{background:#111827;color:#fff;padding:20px;text-align:center}
 .title{font-size:24px;font-weight:700}
 .date{font-size:18px;opacity:.9;margin-top:4px}
@@ -25,8 +25,26 @@ input{display:none}
 input:checked + .opt.ok{background:#ecfdf5;border-color:#10b981;color:#047857}
 input:checked + .opt.mid{background:#fff7ed;border-color:#fb923c;color:#9a3412}
 input:checked + .opt.low{background:#fef2f2;border-color:#ef4444;color:#991b1b}
-.fab{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);width:calc(100% - 40px);max-width:720px;background:#2563eb;color:#fff;border:none;border-radius:26px;padding:26px;font-size:22px;font-weight:800;box-shadow:0 12px 26px rgba(37,99,235,.45)}
-.fab:active{transform:translateX(-50%) scale(.96)}
+.fab{
+  position:fixed;
+  left:50%;
+  bottom:16px;
+  transform:translateX(-50%);
+  width:calc(100% - 80px);
+  max-width:520px;
+  background:#2563eb;
+  color:#fff;
+  border:none;
+  border-radius:20px;
+  padding:14px;
+  font-size:17px;
+  font-weight:700;
+  box-shadow:0 8px 18px rgba(37,99,235,.4);
+}
+.fab:active{
+  transform:translateX(-50%) scale(.96);
+}
+
 .buy-box{background:#fff7ed;border:3px dashed #fb923c;border-radius:20px;padding:20px;margin-top:20px}
 .buy-title{font-weight:900;font-size:22px;margin-bottom:6px}
 .buy-date{font-size:16px;opacity:.8;margin-bottom:10px}
@@ -50,41 +68,70 @@ input:checked + .opt.low{background:#fef2f2;border-color:#ef4444;color:#991b1b}
 }
 .report-btn:active{transform:scale(.9)}
 .report-modal{
+padding:20px; 
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.5);
   display:none;
   align-items:center;
   justify-content:center;
-  z-index:100;
+  z-index:9999; /* ดันขึ้นบนสุด กันโดน header/fab ทับ */
 }
+
 .report-box{
   background:#fff;
   width:90%;
   max-width:420px;
   border-radius:20px;
   padding:20px;
+  box-shadow:0 20px 40px rgba(0,0,0,.3);
 }
+
 .report-title{
   font-size:20px;
   font-weight:800;
   margin-bottom:10px;
 }
+
 .report-box input{
-  width:100%;
+  width:90%;
   padding:10px;
   font-size:16px;
   margin-bottom:12px;
+  box-sizing:border-box;
 }
+
+/* แก้เฉพาะ date input */
+.report-box input[type="date"]{
+  appearance:auto;
+  -webkit-appearance:auto;
+  background:#fff;
+  color:#111;
+  border:1px solid #d1d5db;
+  border-radius:12px;
+  min-height:44px;
+}
+
+
 .report-result{
-  max-height:260px;
-  overflow:auto;
+  min-height:auto;          /* ⭐ จุดสำคัญ */
+  max-height:500px;
+  overflow-y:auto;
   margin-bottom:12px;
+  font-size:16px;
 }
+
 .report-item{
   padding:8px 0;
   border-bottom:1px dashed #ddd;
 }
+
+.report-empty{
+  text-align:center;
+  color:#6b7280;
+  padding:20px 0;
+}
+
 .close-btn{
   width:100%;
   padding:12px;
@@ -94,6 +141,18 @@ input:checked + .opt.low{background:#fef2f2;border-color:#ef4444;color:#991b1b}
   background:#111827;
   color:#fff;
 }
+.date-input{
+  background:#fff;
+  color:#111;
+  border:2px solid #2563eb;
+  border-radius:14px;
+  padding:12px;
+  font-size:16px;
+}
+.report-box input[type="date"]{
+  display:block !important;
+}
+
 
 </style>
 </head>
@@ -157,7 +216,7 @@ function showBuy(list){
   document.getElementById('loading').style.display='none';
   const box=document.getElementById('buy');
   if(list.length===0){
-    box.innerHTML=`<div class="buy-box"><div class="buy-title">สต็อกยังโอเค</div><div class="buy-date">${todayText}</div></div>`;
+    box.innerHTML=`<div class="buy-box"><div class="buy-title">วันนี้ไม่ต้องซื้อของ</div><div class="buy-date">${todayText}</div></div>`;
     return;
   }
   let html=`<div class="buy-box"><div class="buy-title">รายการที่ต้องซื้อ</div><div class="buy-date">${todayText}</div>`;
@@ -173,7 +232,6 @@ html2canvas(document.querySelector('.buy-box')).then(canvas=>{
 
 }
 
-
 function closeReport(){
   document.getElementById('reportModal').style.display='none';
 }
@@ -182,13 +240,16 @@ function openReport(){
   document.getElementById('reportModal').style.display='flex';
 
   const input = document.getElementById('reportDate');
+  const result = document.getElementById('reportResult');
+
   input.value = '';
+  result.innerHTML = '<div class="report-empty">เลือกวันที่เพื่อดูข้อมูล</div>';
 
   input.onchange = e => {
     const date = e.target.value;
     if(!date) return;
 
-    document.getElementById('reportResult').innerHTML = 'กำลังโหลด...';
+    result.innerHTML = '<div class="report-empty">กำลังโหลด...</div>';
 
     fetch(API+'?action=report&date='+date)
       .then(r=>r.json())
@@ -196,27 +257,29 @@ function openReport(){
   };
 }
 
-
 function showReport(list){
   const box=document.getElementById('reportResult');
-  if(list.length===0){
-    box.innerHTML='<div class="report-item">ไม่มีข้อมูล</div>';
+
+  if(!list || list.length===0){
+    box.innerHTML='<div class="report-empty">ไม่มีรายการที่ต้องซื้อ</div>';
     return;
   }
+
   box.innerHTML='';
   list.forEach(i=>{
     box.innerHTML+=`<div class="report-item">• ${i.name}</div>`;
   });
 }
 
+
 </script>
 <div class="report-modal" id="reportModal">
   <div class="report-box">
     <div class="report-title">📅 รายการที่ต้องซื้อย้อนหลัง</div>
 
-    <input type="date" id="reportDate">
+    <input type="date" id="reportDate" class="date-input">
+<div id="reportResult"></div>
 
-    <div id="reportResult" class="report-result"></div>
 
     <button class="close-btn" onclick="closeReport()">ปิด</button>
   </div>
