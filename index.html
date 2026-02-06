@@ -1,54 +1,107 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เช็คสต็อกสินค้า</title>
 
-  <title>เช็คสต็อกสินค้า</title>
+<meta name="theme-color" content="#2563eb">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
 
-  <meta name="theme-color" content="#2563eb">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="เช็คสต็อก">
-
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" sizes="192x192" href="icon-192.png">
-  <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
-
-  <style>
-    body{
-      font-family:system-ui;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      height:100vh;
-      background:#2563eb;
-      color:#fff;
-      text-align:center;
-    }
-    button{
-      margin-top:20px;
-      padding:14px 24px;
-      font-size:18px;
-      border:none;
-      border-radius:12px;
-      font-weight:700;
-    }
-  </style>
+<style>
+body{margin:0;font-family:system-ui,sans-serif;background:#f3f4f6;color:#111;padding-bottom:120px}
+header{background:#111827;color:#fff;padding:24px;text-align:center}
+.title{font-size:28px;font-weight:800}
+.date{font-size:20px;opacity:.9;margin-top:6px}
+.wrap{max-width:720px;margin:auto;padding:20px}
+.card{background:#fff;border-radius:20px;padding:20px;margin-bottom:18px;box-shadow:0 8px 20px rgba(0,0,0,.08)}
+.name{font-size:26px;font-weight:700;margin-bottom:16px}
+.opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.opt{border:2px solid #d1d5db;border-radius:16px;padding:22px 10px;text-align:center;font-size:20px;font-weight:600;transition:.15s}
+.opt:active{transform:scale(.95)}
+input{display:none}
+input:checked + .opt.ok{background:#ecfdf5;border-color:#10b981;color:#047857}
+input:checked + .opt.mid{background:#fff7ed;border-color:#fb923c;color:#9a3412}
+input:checked + .opt.low{background:#fef2f2;border-color:#ef4444;color:#991b1b}
+.fab{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);width:calc(100% - 40px);max-width:720px;background:#2563eb;color:#fff;border:none;border-radius:26px;padding:26px;font-size:22px;font-weight:800;box-shadow:0 12px 26px rgba(37,99,235,.45)}
+.fab:active{transform:translateX(-50%) scale(.96)}
+.buy-box{background:#fff7ed;border:3px dashed #fb923c;border-radius:20px;padding:20px;margin-top:20px}
+.buy-title{font-weight:900;font-size:22px;margin-bottom:6px}
+.buy-date{font-size:16px;opacity:.8;margin-bottom:10px}
+.buy-item{font-size:20px;margin-left:10px;margin-bottom:6px}
+.loading{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:99}
+.spinner{width:64px;height:64px;border:6px solid #ddd;border-top-color:#2563eb;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
 </head>
 <body>
+<header>
+  <div class="title">เช็คสต็อกสินค้า</div>
+  <div class="date" id="today"></div>
+</header>
 
-<div>
-  <h1>เช็คสต็อกสินค้า</h1>
-  <p>เพิ่มลงหน้าจอหลักก่อน แล้วค่อยเข้าใช้งาน</p>
+<div class="wrap" id="list"></div>
+<div class="wrap" id="buy"></div>
+<button class="fab" onclick="save()">บันทึกและสรุป</button>
 
-  <button onclick="go()">เข้าใช้งาน</button>
-</div>
+<div class="loading" id="loading"><div class="spinner"></div></div>
 
 <script>
-function go(){
-  location.href = "https://script.google.com/macros/s/URL_ของคุณ/exec";
+const API = 'https://script.google.com/macros/s/AKfycbyV6wZDcVU7szOXuuQNj21rjn7-dvQ8JNqwQXaaMS8NvfD5DG2kIpyOjwfPbaHLUf9SLw/exec';
+let stockData=[];
+let todayText='';
+
+(()=>{
+  const d=new Date();
+  todayText=d.toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('today').textContent=todayText;
+})();
+
+fetch(API+'?action=getStock')
+.then(r=>r.json())
+.then(data=>{
+  stockData=data;
+  const div=document.getElementById('list');
+  data.forEach(i=>{
+    div.innerHTML+=`
+    <div class="card">
+      <div class="name">${i.name}</div>
+      <div class="opts">
+        <label><input type="radio" name="${i.id}" value="มีเยอะ" checked><div class="opt ok">มีเยอะ</div></label>
+        <label><input type="radio" name="${i.id}" value="เหลือครึ่งเดียว"><div class="opt mid">ครึ่งเดียว</div></label>
+        <label><input type="radio" name="${i.id}" value="หมดแล้วหรือใกล้หมด"><div class="opt low">ใกล้หมด</div></label>
+      </div>
+    </div>`;
+  });
+});
+
+function save(){
+  document.getElementById('loading').style.display='flex';
+  const result=stockData.map(i=>({
+    id:i.id,
+    name:i.name,
+    status:document.querySelector(`input[name="${i.id}"]:checked`).value
+  }));
+
+  fetch(API,{method:'POST',body:JSON.stringify(result)})
+  .then(r=>r.json())
+  .then(showBuy);
+}
+
+function showBuy(list){
+  document.getElementById('loading').style.display='none';
+  const box=document.getElementById('buy');
+  if(list.length===0){
+    box.innerHTML=`<div class="buy-box"><div class="buy-title">สต็อกยังโอเค</div><div class="buy-date">${todayText}</div></div>`;
+    return;
+  }
+  let html=`<div class="buy-box"><div class="buy-title">รายการที่ต้องซื้อ</div><div class="buy-date">${todayText}</div>`;
+  list.forEach(i=>html+=`<div class="buy-item">• ${i.name}</div>`);
+  html+='</div>';
+  box.innerHTML=html;
 }
 </script>
-
 </body>
 </html>
