@@ -4,20 +4,51 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>เช็คสต็อก</title>
+  <title>เช็คสต็อกสินค้า</title>
+
+  <meta name="theme-color" content="#2563eb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="เช็คสต็อก">
 
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#2563eb">
-
   <link rel="icon" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+
+  <style>
+    body{
+      font-family:system-ui;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      height:100vh;
+      background:#2563eb;
+      color:#fff;
+      text-align:center;
+    }
+    button{
+      margin-top:20px;
+      padding:14px 24px;
+      font-size:18px;
+      border:none;
+      border-radius:12px;
+      font-weight:700;
+    }
+  </style>
 </head>
 <body>
-กำลังเปิดระบบ…
+
+<div>
+  <h1>เช็คสต็อกสินค้า</h1>
+  <p>เพิ่มลงหน้าจอหลักก่อน แล้วค่อยเข้าใช้งาน</p>
+
+  <button onclick="go()">เข้าใช้งาน</button>
+</div>
 
 <script>
-  // 👉 ใส่ URL Web App ของ Apps Script ตรงนี้
-  location.href = "https://script.google.com/macros/s/AKfycbyV6wZDcVU7szOXuuQNj21rjn7-dvQ8JNqwQXaaMS8NvfD5DG2kIpyOjwfPbaHLUf9SLw/exec";
+function go(){
+  location.href = "https://script.google.com/macros/s/URL_ของคุณ/exec";
+}
 </script>
+
 </body>
 </html>
