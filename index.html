@@ -47,6 +47,7 @@ input:checked + .opt.low{background:#fef2f2;border-color:#ef4444;color:#991b1b}
 <button class="fab" onclick="save()">บันทึกและสรุป</button>
 
 <div class="loading" id="loading"><div class="spinner"></div></div>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <script>
 const API = 'https://script.google.com/macros/s/AKfycbyV6wZDcVU7szOXuuQNj21rjn7-dvQ8JNqwQXaaMS8NvfD5DG2kIpyOjwfPbaHLUf9SLw/exec';
@@ -101,7 +102,15 @@ function showBuy(list){
   list.forEach(i=>html+=`<div class="buy-item">• ${i.name}</div>`);
   html+='</div>';
   box.innerHTML=html;
+html2canvas(document.querySelector('.buy-box')).then(canvas=>{
+  const link = document.createElement('a');
+  link.download = `รายการที่ต้องซื้อ_${new Date().toISOString().slice(0,10)}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+});
+
 }
 </script>
+
 </body>
 </html>
