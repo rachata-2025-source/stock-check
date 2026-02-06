@@ -34,6 +34,67 @@ input:checked + .opt.low{background:#fef2f2;border-color:#ef4444;color:#991b1b}
 .loading{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:99}
 .spinner{width:64px;height:64px;border:6px solid #ddd;border-top-color:#2563eb;border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+.report-btn{
+  position:fixed;
+  top:16px;
+  right:16px;
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  border:none;
+  background:#2563eb;
+  color:#fff;
+  font-size:20px;
+  box-shadow:0 6px 16px rgba(0,0,0,.25);
+  z-index:50;
+}
+.report-btn:active{transform:scale(.9)}
+.report-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+}
+.report-box{
+  background:#fff;
+  width:90%;
+  max-width:420px;
+  border-radius:20px;
+  padding:20px;
+}
+.report-title{
+  font-size:20px;
+  font-weight:800;
+  margin-bottom:10px;
+}
+.report-box input{
+  width:100%;
+  padding:10px;
+  font-size:16px;
+  margin-bottom:12px;
+}
+.report-result{
+  max-height:260px;
+  overflow:auto;
+  margin-bottom:12px;
+}
+.report-item{
+  padding:8px 0;
+  border-bottom:1px dashed #ddd;
+}
+.close-btn{
+  width:100%;
+  padding:12px;
+  font-size:18px;
+  border:none;
+  border-radius:14px;
+  background:#111827;
+  color:#fff;
+}
+
 </style>
 </head>
 <body>
@@ -41,6 +102,7 @@ input:checked + .opt.low{background:#fef2f2;border-color:#ef4444;color:#991b1b}
   <div class="title">เช็คสต็อกสินค้า</div>
   <div class="date" id="today"></div>
 </header>
+<button class="report-btn" onclick="openReport()">📊</button>
 
 <div class="wrap" id="list"></div>
 <div class="wrap" id="buy"></div>
@@ -110,7 +172,55 @@ html2canvas(document.querySelector('.buy-box')).then(canvas=>{
 });
 
 }
+
+
+function closeReport(){
+  document.getElementById('reportModal').style.display='none';
+}
+
+function openReport(){
+  document.getElementById('reportModal').style.display='flex';
+
+  const input = document.getElementById('reportDate');
+  input.value = '';
+
+  input.onchange = e => {
+    const date = e.target.value;
+    if(!date) return;
+
+    document.getElementById('reportResult').innerHTML = 'กำลังโหลด...';
+
+    fetch(API+'?action=report&date='+date)
+      .then(r=>r.json())
+      .then(showReport);
+  };
+}
+
+
+function showReport(list){
+  const box=document.getElementById('reportResult');
+  if(list.length===0){
+    box.innerHTML='<div class="report-item">ไม่มีข้อมูล</div>';
+    return;
+  }
+  box.innerHTML='';
+  list.forEach(i=>{
+    box.innerHTML+=`<div class="report-item">• ${i.name}</div>`;
+  });
+}
+
 </script>
+<div class="report-modal" id="reportModal">
+  <div class="report-box">
+    <div class="report-title">📅 รายการที่ต้องซื้อย้อนหลัง</div>
+
+    <input type="date" id="reportDate">
+
+    <div id="reportResult" class="report-result"></div>
+
+    <button class="close-btn" onclick="closeReport()">ปิด</button>
+  </div>
+</div>
 
 </body>
 </html>
